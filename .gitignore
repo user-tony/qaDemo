@@ -1,0 +1,4 @@
+.next/cache/webpack
+.next
+node_modules
+.env

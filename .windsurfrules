@@ -1,0 +1,70 @@
+# Project Guidelines for AI Development
+
+1. Feature Protection Rules:
+   - DO NOT remove or modify existing features without explicit approval
+   - Document any feature changes in /docs/changes.md
+   - If a feature needs updates, first create a proposal in /proposals
+   - Keep backwards compatibility when possible
+
+2. Development Framework Guidelines:
+   - Prioritize using existing frameworks and libraries
+   - Current approved frameworks:
+     * Next.js 14+ (primary framework)
+     * React 18+ (UI library)
+     * Tailwind CSS (styling)
+   - New framework additions require team review
+
+3. Code Quality Requirements:
+   - All features must be fully functional before merge
+   - Include proper error handling
+   - Add comprehensive documentation
+   - Ensure mobile responsiveness
+   - Test across different browsers
+
+4. Component Structure Guidelines:
+   - Keep AI-related components in /components/ai directory
+   - Follow atomic design pattern
+   - Implement proper loading states
+   - Add TypeScript types for all props
+
+5. Don't modify these core files:
+   - /app/api/ai/*
+   - /lib/ai-utils/*
+   - /config/ai-config.ts
+   - Any existing feature files without approval
+
+6. Development Process:
+   - Create feature branch for new development
+   - Write tests before implementing features
+   - Get code review before merging
+   - Update documentation alongside code
+
+7. Testing Requirements:
+   - Must have unit tests (Jest)
+   - E2E tests for critical paths (Cypress)
+   - Test coverage > 80%
+   - Include accessibility tests
+
+8. Performance Guidelines:
+   - Optimize AI model loading
+   - Implement proper loading states
+   - Regular performance audits
+   - Monitor and optimize bundle size
+
+9. Completion Criteria:
+   - Features must be fully functional
+   - All tests must pass
+   - Documentation must be complete
+   - No breaking changes to existing features
+   - Mobile responsive design
+   - Browser compatibility checked
+   - Performance requirements met
+
+10. Framework Extension:
+    - Evaluate existing solutions first
+    - Document why new framework is needed
+    - Consider impact on bundle size
+    - Ensure team has necessary expertise
+    - Provide migration guide if needed
+
+# Click to add this file to .gitignore
