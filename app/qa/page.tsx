@@ -4,7 +4,8 @@ import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Upload, Input, message, Card, Select } from 'antd';
 import { FileTextOutlined, SendOutlined, InboxOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
+import type { UploadFile, RcFile, UploadFileStatus } from 'antd/es/upload/interface';
+import type { UploadProps } from 'antd';
 import { submissionAPI } from '../services/api';
 import LatexEditor from '../components/LatexEditor';
 
@@ -45,31 +46,33 @@ export default function QAPage() {
   const [loading, setLoading] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<string[]>([]);
 
-  const handleFileUpload = async (options) => {
-    const { file, onProgress } = options;
+  const handleFileUpload: UploadProps['customRequest'] = async (options) => {
+    const { file, onProgress, onSuccess, onError } = options;
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file as RcFile);
 
     try {
       const response = await submissionAPI.uploadFile(formData, (progressEvent) => {
         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        onProgress({ percent });
+        onProgress?.({ percent });
       });
 
       const uploadResponse = response.data as UploadResponse;
       
-      // 如果响应包含引文信息，说明是成功的上传
       if (uploadResponse.code === 'ok') {
         message.success('文件上传成功');
         
-        // 创建一个新的文件对象，不包含引文信息
-        const fileResponse = {
-          name: file.name,
-          status: 'done' as const,
-          uid: file.uid,
-          url: '#', // 如果需要预览，这里需要设置实际的URL
+        const fileResponse: UploadFile = {
+          name: (file as RcFile).name,
+          status: 'done' as UploadFileStatus,
+          uid: (file as RcFile).uid,
+          url: '#',
+          type: (file as RcFile).type,
+          size: (file as RcFile).size,
+          response: uploadResponse
         };
 
+        onSuccess?.(fileResponse);
         return fileResponse;
       } else {
         throw new Error('上传失败');
@@ -77,12 +80,15 @@ export default function QAPage() {
     } catch (error) {
       console.error('Error uploading file:', error);
       message.error('上传失败');
+      onError?.(error as Error);
       return {
-        name: file.name,
-        status: 'error' as const,
-        uid: file.uid,
-        error: '上传失败'
-      };
+        name: (file as RcFile).name,
+        status: 'error' as UploadFileStatus,
+        uid: (file as RcFile).uid,
+        error: '上传失败',
+        type: (file as RcFile).type,
+        size: (file as RcFile).size
+      } as UploadFile;
     }
   };
 
@@ -141,20 +147,18 @@ export default function QAPage() {
   };
 
   const handleChange = useCallback(({ fileList }: { fileList: UploadFile[] }) => {
-    // 确保文件列表中的每个文件对象都不包含引文信息
     const newFileList = fileList.map(file => {
       const { response, ...rest } = file;
       if (response && response.data?.citations) {
-        // 如果响应中包含引文信息，创建一个新的响应对象，去掉引文信息
         return {
           ...rest,
-          status: 'done',
+          status: 'done' as UploadFileStatus,
           response: {
             code: response.code,
             message: response.message,
             data: {}
           }
-        };
+        } as UploadFile;
       }
       return file;
     });

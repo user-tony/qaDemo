@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Input, Select, Button, Table, Tag, message, Modal, Space, Typography, Spin, Empty, List } from 'antd';
-import { scholarAPI, Paper } from '../services/api';
+import { Input, Select, Button, Table, Tag, message, Modal, Space, Typography, Spin, Empty, List, Tabs, TabsProps } from 'antd';
+import { scholarAPI, Paper, CitationFormats } from '../services/api';
 import { 
   SearchOutlined, 
   LinkOutlined,
@@ -45,7 +45,7 @@ export default function ScanPage() {
   });
   const [selectedPaper, setSelectedPaper] = React.useState<Paper | null>(null);
   const [citationStyle, setCitationStyle] = React.useState(CITATION_STYLES[0].value);
-  const [citations, setCitations] = React.useState<any>(null);
+  const [citations, setCitations] = React.useState<CitationFormats | null>(null);
   const [loadingCitation, setLoadingCitation] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
@@ -164,6 +164,7 @@ export default function ScanPage() {
       });
       setSearchParams(prev => ({ ...prev, page: 1 }));
     } catch (error) {
+      console.error('搜索失败:', error);
       message.error('搜索失败，请重试');
     } finally {
       setLoading(false);
@@ -189,6 +190,7 @@ export default function ScanPage() {
         pageSize: pageSize || prev.pageSize,
       }));
     } catch (error) {
+      console.error('加载失败:', error);
       message.error('加载失败，请重试');
     } finally {
       setLoading(false);
@@ -215,11 +217,12 @@ export default function ScanPage() {
   };
 
   // 获取单个引用格式
-  const fetchCitation = async (paperId: string, style: string) => {
+  const fetchCitation = async (paperId: string, style: string): Promise<string | null> => {
     try {
-      const response = await scholarAPI.getCitation(paperId, style);
-      return response.data;
+      const citation = await scholarAPI.getCitation(paperId, style);
+      return citation;
     } catch (error) {
+      console.error('获取引用格式失败:', error);
       message.error('获取引用格式失败');
       return null;
     }
@@ -231,6 +234,7 @@ export default function ScanPage() {
       await navigator.clipboard.writeText(text);
       message.success('已复制到剪贴板');
     } catch (err) {
+      console.error('复制失败:', err);
       message.error('复制失败');
     }
   };
@@ -258,6 +262,24 @@ export default function ScanPage() {
   const goToQuestions = (submissionId: number) => {
     router.push(`/qa?id=${submissionId}`);
   };
+
+  const citationItems: TabsProps['items'] = citations ? Object.entries(citations).map(([format, citation]) => ({
+    key: format,
+    label: format,
+    children: (
+      <div className="relative">
+        <pre className="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap">
+          {citation}
+        </pre>
+        <Button
+          type="text"
+          icon={<CopyOutlined />}
+          className="absolute top-2 right-2"
+          onClick={() => copyToClipboard(citation)}
+        />
+      </div>
+    ),
+  })) : [];
 
   return (
     <div className="space-y-6 p-6">
@@ -391,30 +413,10 @@ export default function ScanPage() {
                     <Spin />
                   </div>
                 ) : citations ? (
-                  <>
-                    {Object.entries(citations).map(([format, citation]) => (
-                      <div key={format} className="bg-white p-3 rounded border">
-                        <div className="flex justify-between items-center mb-2">
-                          <Text strong>{format}</Text>
-                          <Space>
-                            <Button
-                              size="small"
-                              icon={<CopyOutlined />}
-                              onClick={() => {
-                                navigator.clipboard.writeText(citation);
-                                message.success('已复制到剪贴板');
-                              }}
-                            >
-                              复制
-                            </Button>
-                          </Space>
-                        </div>
-                        <div className="text-sm text-gray-600 whitespace-pre-wrap break-all font-mono">
-                          {citation || '格式转换失败'}
-                        </div>
-                      </div>
-                    ))}
-                  </>
+                  <Tabs 
+                    defaultActiveKey="BIBTEX"
+                    items={citationItems}
+                  />
                 ) : (
                   <Empty description="暂无引用格式数据" />
                 )}

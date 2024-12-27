@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Layout, Menu, Button, Dropdown, Avatar } from 'antd';
+import type { MenuProps } from 'antd';
 import {
   UserOutlined,
   DashboardOutlined,
-  RobotOutlined,
   QuestionCircleOutlined,
   LogoutOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -27,30 +28,35 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const menuItems = [
     {
-      key: 'dashboard',
+      key: '/dashboard',
       icon: <DashboardOutlined />,
       label: '仪表盘',
       onClick: () => router.push('/dashboard'),
     },
     {
-      key: 'qa',
-      icon: <RobotOutlined />,
-      label: '智能问答',
+      key: '/qa',
+      icon: <QuestionCircleOutlined />,
+      label: '问答',
       onClick: () => router.push('/qa'),
     },
     {
-      key: 'help',
+      key: '/help',
       icon: <QuestionCircleOutlined />,
-      label: '使用帮助',
+      label: '帮助',
       onClick: () => router.push('/help'),
     },
   ];
 
-  const userMenuItems = [
+  const userMenuItems: MenuProps['items'] = [
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: '个人中心',
+      label: '个人信息',
+    },
+    {
+      key: 'settings',
+      icon: <SettingOutlined />,
+      label: '设置',
     },
     {
       type: 'divider',
@@ -59,63 +65,72 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: '退出登录',
+      danger: true,
       onClick: handleLogout,
     },
   ];
 
   return (
-    <Layout className="min-h-screen bg-gradient-to-b from-gray-50/30 to-white/80">
+    <div className="min-h-screen bg-gray-50">
       <div className="fixed top-0 left-0 right-0 h-20 bg-white/60 backdrop-blur-lg border-b border-gray-100/50 z-50">
         <div className="max-w-7xl mx-auto h-full px-6">
           <div className="flex items-center justify-between h-full">
-          
+            {/* Logo */}
+            <div className="flex items-center">
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">
+                QaDemo
+              </span>
+            </div>
 
             {/* 导航菜单 */}
             <div className="flex-1 flex justify-center">
               <Menu
                 mode="horizontal"
-                selectedKeys={[pathname === '/dashboard' ? 'dashboard' : pathname === '/qa' ? 'qa' : 'help']}
-                items={menuItems}
+                selectedKeys={[pathname]}
                 className="border-none !bg-transparent min-w-[400px] justify-center"
                 style={{
                   background: 'transparent',
                   transition: 'all 0.3s ease',
                 }}
-                itemRender={(item, dom) => (
-                  <div className="hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-700 hover:text-white transition-all duration-300 rounded-md px-3 py-1">
-                    {dom}
-                  </div>
-                )}
-              />
+              >
+                {menuItems.map(item => (
+                  <Menu.Item
+                    key={item.key}
+                    icon={item.icon}
+                    onClick={item.onClick}
+                    className="hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-700 hover:text-white transition-all duration-300 rounded-md px-3 py-1"
+                  >
+                    {item.label}
+                  </Menu.Item>
+                ))}
+              </Menu>
             </div>
 
             {/* 用户信息 */}
             <div className="flex items-center">
               <Dropdown 
-                menu={{ items: userMenuItems }} 
+                menu={{ items: userMenuItems }}
                 placement="bottomRight"
                 trigger={['click']}
               >
-                <Button 
-                  type="text"
-                  className="flex items-center gap-2 px-3 h-10 rounded-full hover:bg-gray-50/80 border border-gray-100 transform hover:scale-105 transition-transform duration-300"
-                >
+                <div className="flex items-center cursor-pointer hover:bg-gray-100 rounded-full px-3 py-1.5 transition-all duration-300">
                   <Avatar 
-                    size="small"
-                    icon={<UserOutlined />} 
-                    className="bg-gradient-to-r from-blue-500 to-blue-700 text-white"
+                    icon={<UserOutlined />}
+                    className="bg-gradient-to-r from-blue-500 to-blue-700"
                   />
-                  <span className="text-gray-700">用户中心</span>
-                </Button>
+                  <span className="ml-2 text-gray-700">用户名</span>
+                </div>
               </Dropdown>
             </div>
           </div>
         </div>
       </div>
 
-      <Content className="mt-20 p-6">
-        {children}
-      </Content>
-    </Layout>
+      <div className="pt-20">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {children}
+        </div>
+      </div>
+    </div>
   );
 }
