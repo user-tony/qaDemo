@@ -39,6 +39,12 @@ const menuItems = [
     path: '/qa'
   },
   {
+    key: 'scan',
+    icon: Bot,
+    label: 'semantic search',
+    path: '/scan'
+  },
+  {
     key: 'history',
     icon: History,
     label: '历史记录',
@@ -294,68 +300,33 @@ export default function QAPage() {
     };
   }, [handlePaste]);
 
+  const handleRecordClick = async (submissionId: number) => {
+    try {
+      const response = await submissionAPI.getSubmissions({
+        submission_id: submissionId,
+        page: 1,
+        per_page: 10
+      });
+      
+      // 更新当前选中的记录
+      const selectedSubmission = response.data.items[0];
+      if (selectedSubmission) {
+        setQuestion(selectedSubmission.content || '');
+        setFileList(selectedSubmission.attachments?.map((file: any) => ({
+          uid: file.id,
+          name: file.name,
+          status: 'done',
+          url: file.url
+        })) || []);
+      }
+    } catch (error) {
+      console.error('Error fetching submission details:', error);
+      message.error('加载提交记录失败');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/50">
-      <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
-        <div className="container flex h-16 items-center">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <Bot className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-gray-900">AI 智能问答系统</span>
-            </div>
-          </div>
-
-          <div className="mx-8 flex-1">
-            <nav className="flex items-center space-x-1">
-              {menuItems.map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => handleMenuClick({ key: item.key })}
-                  className={cn(
-                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                    router.pathname === item.path
-                      ? "bg-gray-100 text-gray-900"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                  )}
-                >
-                  <div className="flex items-center space-x-2">
-                    {React.createElement(item.icon, { className: "h-4 w-4" })}
-                    <span>{item.label}</span>
-                  </div>
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-              onClick={() => router.push('/settings')}
-            >
-              <Settings className="h-5 w-5" />
-            </button>
-            <button
-              className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
-            <div className="w-px h-6 bg-gray-200 mx-2" />
-            <div className="flex items-center space-x-3 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-900">Tony</span>
-                <span className="text-xs text-gray-500">tony@example.com</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto py-6 px-4">
         <div className="flex gap-6">
           {/* 左侧提问区域 */}
@@ -553,7 +524,8 @@ export default function QAPage() {
                   {submissions.map((item, index) => (
                     <div
                       key={index}
-                      className="group p-4 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
+                      className="group p-4 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all cursor-pointer"
+                      onClick={() => handleRecordClick(item.id)}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
