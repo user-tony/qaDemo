@@ -1,0 +1,114 @@
+.latex-preview {
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.latex-source {
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #1a1a1a;
+  width: 100%;
+}
+
+.preview-card {
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.preview-card .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 16px;
+  min-height: 48px;
+  background: #fafafa;
+}
+
+.preview-card .ant-card-head-title {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.latex-preview .katex {
+  font-size: 1.21em;
+  text-align: center;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+.latex-preview .katex-display {
+  margin: 0.5em 0;
+  padding: 0.5em 0;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.latex-preview .katex-error {
+  color: #ff4d4f;
+  background-color: #fff2f0;
+  padding: 0.5em;
+  border-radius: 4px;
+  margin: 0.5em 0;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* 自定义滚动条样式 */
+.latex-preview::-webkit-scrollbar,
+.latex-source::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.latex-preview::-webkit-scrollbar-track,
+.latex-source::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 3px;
+}
+
+.latex-preview::-webkit-scrollbar-thumb,
+.latex-source::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+
+.latex-preview::-webkit-scrollbar-thumb:hover,
+.latex-source::-webkit-scrollbar-thumb:hover {
+  background: #bfbfbf;
+}
+
+.latex-toolbar {
+  margin-bottom: 1em;
+  padding: 0.5em;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.latex-toolbar .ant-btn {
+  margin-right: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.latex-toolbar .ant-btn-sm {
+  font-size: 12px;
+  height: 24px;
+  padding: 0 8px;
+}

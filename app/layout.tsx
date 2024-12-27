@@ -1,6 +1,8 @@
 'use client';
 
 import './globals.css';
+import './styles/latex.css';
+import 'katex/dist/katex.min.css';
 import { Inter } from 'next/font/google';
 import { Layout, Menu, Dropdown, Avatar } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
@@ -52,6 +54,10 @@ export default function RootLayout({
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <title>QA Demo</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body className={inter.className}>
         <AntdRegistry>
           <Layout className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">

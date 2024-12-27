@@ -25,6 +25,50 @@ const removeEmptyFields = (obj: Record<string, any>) => {
   );
 };
 
+// 文献接口类型
+export interface Paper {
+  id: string;
+  title: string;
+  abstract?: string;
+  authors: string[];
+  year: number;
+  citation_count: number;
+  venue: string;
+  url?: string;
+  fields_of_study: string[];
+}
+
+// API响应接口
+export interface PaperResponse {
+  code: string;
+  message: string;
+  data: {
+    total: number;
+    papers: Paper[];
+  };
+}
+
+// 引用格式接口
+export interface CitationFormats {
+  BIBTEX: string;
+  APA: string;
+  MLA: string;
+  CHICAGO: string;
+  HARVARD: string;
+}
+
+export interface CitationResponse {
+  code: string;
+  message: string;
+  data: {
+    BIBTEX: string;
+    APA: string;
+    MLA: string;
+    CHICAGO: string;
+    HARVARD: string;
+  };
+}
+
 export const authAPI = {
   login: async (username: string, password: string) => {
     const response = await api.post('/v1/paper/user/auth/login', { email: username, password });
@@ -81,20 +125,25 @@ export const submissionAPI = {
 };
 
 export const scholarAPI = {
+  // 搜索论文
   searchPapers: async (params: {
     query: string;
     time_range?: string;
     type?: string;
-  }) => {
+    page?: number;
+    pageSize?: number;
+  }): Promise<PaperResponse> => {
     try {
-      // 过滤掉空值字段
-      const filteredParams = removeEmptyFields(params);
-      console.log('发送搜索请求，参数:', filteredParams);
+      const filteredParams = removeEmptyFields({
+        ...params,
+        page: params.page,
+        per_page: params.pageSize
+      });
       
+      console.log('发送搜索请求，参数:', filteredParams);
       const response = await api.get('/v2/paper/semantic_scholar', { 
         params: filteredParams 
       });
-      
       console.log('搜索响应:', response.data);
       return response.data;
     } catch (error) {
@@ -102,4 +151,93 @@ export const scholarAPI = {
       throw error;
     }
   },
+
+  // 获取所有引用格式
+  getAllCitations: async (paperId: string): Promise<CitationFormats> => {
+    try {
+      console.log('Fetching citations for paper:', paperId);
+      const response = await api.get(`/v2/paper/semantic_scholar/${paperId}/citations`);
+      
+      // 检查响应数据的格式
+      if (response.data?.code === 'ok' && response.data?.data) {
+        return response.data.data;
+      } else {
+        console.error('Invalid citation response format:', response.data);
+        throw new Error('Invalid citation response format');
+      }
+    } catch (error) {
+      console.error('获取引用格式失败:', error);
+      throw error;
+    }
+  },
+
+  // 获取指定格式的引用
+  getCitation: async (paperId: string, style: string): Promise<string> => {
+    try {
+      console.log('Fetching citation for paper:', paperId, 'style:', style);
+      const response = await api.get(`/v2/paper/semantic_scholar/${paperId}/citation`, {
+        params: { style }
+      });
+      console.log('Citation response:', response.data);
+      return response.data.data;
+    } catch (error) {
+      console.error('获取引用格式失败:', error);
+      throw error;
+    }
+  },
+
+  // 获取提交状态
+  getSubmissionStatus: async (submissionId: number): Promise<SubmissionStatus> => {
+    try {
+      const response = await api.get(`/v2/paper/quiz/submission/${submissionId}/status`);
+      return response.data.data;
+    } catch (error) {
+      console.error('获取提交状态失败:', error);
+      throw error;
+    }
+  },
+
+  // 获取问题列表
+  getQuestions: async (submissionId: number, page: number = 1, perPage: number = 10): Promise<QuestionListResponse> => {
+    try {
+      const response = await api.get('/v2/paper/quiz/questions', {
+        params: {
+          submission_id: submissionId,
+          page,
+          per_page: perPage
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('获取问题列表失败:', error);
+      throw error;
+    }
+  }
 };
+
+// 问题接口类型定义
+export interface Question {
+  id: number;
+  submission_id: number;
+  content: string;
+  status: number;
+  difficulty_level: number;
+  category_id: number | null;
+  labels: string[] | null;
+  ai_times: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuestionListResponse {
+  code: string;
+  message: string;
+  data: Question[];
+  total: number;
+}
+
+export interface SubmissionStatus {
+  id: number;
+  status: 'processing' | 'completed' | 'failed';
+  message?: string;
+}
