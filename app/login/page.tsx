@@ -49,10 +49,6 @@ export default function LoginPage() {
           onFinish={onFinish}
           layout="vertical"
           className="mt-8 space-y-6"
-          initialValues={{
-            username: 'tony@quanchengvip.cn',
-            password: '123123'
-          }}
         >
           <div className="space-y-4 rounded-md -space-y-px">
             <Form.Item
